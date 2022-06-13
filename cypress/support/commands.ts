@@ -32,7 +32,7 @@ declare global {
 }
 
 export const authenticate = function (
-    accountName = Cypress.env().testEmailId as string
+    accountName = Cypress.env().TEST_EMAIL_ID as string
 ) {
     cy.log(`USER: ${Cypress.env().testEmailId}`)
     cy.session(accountName, function () {
@@ -41,9 +41,9 @@ export const authenticate = function (
             url: 'https://www.googleapis.com/oauth2/v4/token',
             body: {
                 grant_type: 'refresh_token',
-                client_id: Cypress.env('googleClientId'),
-                client_secret: Cypress.env('googleClientSecret'),
-                refresh_token: Cypress.env('googleRefreshToken'),
+                client_id: Cypress.env('GOOGLE_CLIENT_ID'),
+                client_secret: Cypress.env('GOOGLE_CLIENT_SECRET'),
+                refresh_token: Cypress.env('GOOGLE_REFRESH_TOKEN'),
             },
         }).then(({ body: { access_token } }) =>
             cy.setCookie('access_token', access_token, { log: false })

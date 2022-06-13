@@ -11,7 +11,8 @@ jobs:
             - name: Cypress run
               uses: cypress-io/github-action@v4
               env:
-                CYPRESS_googleRefreshToken: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-                CYPRESS_googleClientId: ${{ secrets.GOOGLE_CLIENTID }}
-                CYPRESS_googleClientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-                CYPRESS_testEmailId: ${{ secrets.TEST_EMAIL_ID }}
+                CYPRESS_GOOGLE_REFRESH_TOKEN: ${{ secrets.CYPRESS_GOOGLE_REFRESH_TOKEN }}
+                CYPRESS_GOOGLE_CLIENT_ID: ${{ secrets.CYPRESS_GOOGLE_CLIENT_ID }}
+                CYPRESS_GOOGLE_CLIENT_SECRET: ${{ secrets.CYPRESS_GOOGLE_CLIENT_SECRET }}
+                CYPRESS_TEST_EMAIL_ID: ${{ secrets.CYPRESS_TEST_EMAIL_ID }}
+                CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
