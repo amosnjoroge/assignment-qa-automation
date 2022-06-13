@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { lorem } from 'faker';
 import { messageBuilder } from '../fixtures/data-factory';
 
 describe('Main Functionality', () => {
@@ -25,9 +25,8 @@ describe('Main Functionality', () => {
     it('POST - send an email message', function () {
         const from = `${this.testAccount}+sender@gmail.com`;
         const to = `${this.testAccount}+receiver@gmail.com`;
-        const subject = faker.lorem.sentence(5);
-        const message = faker.lorem.sentences(4);
-        cy.log(message)
+        const subject = lorem.sentence(5);
+        const message = lorem.sentences(4);
 
         cy.sendMessage({ from, to, subject, message }).then(function () {
             expect(this.sentMessage).to.have.property('id');
