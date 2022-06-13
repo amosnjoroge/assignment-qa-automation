@@ -10,8 +10,9 @@ jobs:
               uses: actions/checkout@v2
             - name: Cypress run
               uses: cypress-io/github-action@v4
-            - name: Archive test results
-              uses: actions/upload-artifact@v3
-              with:
-                name: cypress videos
-                path: cypress/videos/*.mp4
+            env:
+              CYPRESS_googleRefreshToken: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+              CYPRESS_googleClientId: ${{ secrets.GOOGLE_CLIENTID }}
+              CYPRESS_googleClientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+              CYPRESS_testEmailId: ${{ secrets.TEST_EMAIL_ID }}
+            
