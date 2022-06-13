@@ -34,6 +34,7 @@ declare global {
 export const authenticate = function (
     accountName = Cypress.env().testEmailId as string
 ) {
+    cy.log(`USER: ${Cypress.env().testEmailId}`)
     cy.session(accountName, function () {
         cy.request({
             method: 'POST',
