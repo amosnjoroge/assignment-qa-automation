@@ -26,7 +26,10 @@ declare global {
                 ids: string[],
                 userId?: string
             ): Chainable<void>;
-            loginByGoogleUI(): Chainable<void>;
+            verifyResponse(
+                expected: { status: number; bodyEmpty?: boolean },
+                actual: { status: number; body: any }
+            ): Chainable<void>;
         }
     }
 }
@@ -34,7 +37,7 @@ declare global {
 export const authenticate = function (
     accountName = Cypress.env().TEST_EMAIL_ID as string
 ) {
-    cy.log(`USER: ${Cypress.env().testEmailId}`)
+    cy.log(`USER: ${Cypress.env().testEmailId}`);
     cy.session(accountName, function () {
         cy.request({
             method: 'POST',
@@ -61,7 +64,9 @@ export const listMessages = function (userId: string = 'me') {
         method: 'GET',
         url: `/users/${userId}/messages`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
-    }).then(({ body }) => cy.wrap(body, { log: false }).as('messagesList'));
+    }).then(({ status, body }) =>
+        cy.wrap({ status, body }, { log: false }).as('messagesListResponse')
+    );
 };
 
 export const getMessage = function ({
@@ -78,7 +83,9 @@ export const getMessage = function ({
         url: `/users/${userId}/messages/${id}`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
         failOnStatusCode,
-    }).then(({ body }) => cy.wrap(body, { log: false }).as('queriedMessage'));
+    }).then(({ status, body }) =>
+        cy.wrap({ status, body }, { log: false }).as('queriedMessageResponse')
+    );
 };
 
 export const sendMessage = function (
@@ -98,7 +105,9 @@ export const sendMessage = function (
         url: `/users/${userId}/messages/send`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
         body: { raw },
-    }).then(({ body }) => cy.wrap(body, { log: false }).as('sentMessage'));
+    }).then(({ status, body }) =>
+        cy.wrap({ status, body }, { log: false }).as('sentMessageResponse')
+    );
 };
 
 export const modifyMessageLabels = function ({
@@ -112,7 +121,9 @@ export const modifyMessageLabels = function ({
         url: `/users/${userId}/messages/${id}/modify`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
         body: { addLabelIds, removeLabelIds },
-    }).then(({ body }) => cy.wrap(body, { log: false }).as('modifiedMessage'));
+    }).then(({ status, body }) =>
+        cy.wrap({ status, body }, { log: false }).as('modifiedMessageResponse')
+    );
 };
 
 export const trashMessage = function (id: string, userId: string = 'me') {
@@ -120,7 +131,9 @@ export const trashMessage = function (id: string, userId: string = 'me') {
         method: 'POST',
         url: `/users/${userId}/messages/${id}/trash`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
-    }).then(({ body }) => cy.wrap(body, { log: false }).as('trashedMessage'));
+    }).then(({ status, body }) =>
+        cy.wrap({ status, body }, { log: false }).as('trashedMessageResponse')
+    );
 };
 
 export const deleteMessage = function (id: string, userId: string = 'me') {
@@ -128,7 +141,9 @@ export const deleteMessage = function (id: string, userId: string = 'me') {
         method: 'DELETE',
         url: `/users/${userId}/messages/${id}`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
-    });
+    }).then(({ status, body }) =>
+    cy.wrap({ status, body }, { log: false }).as('deletedMessageResponse')
+);
 };
 
 export const batchDeleteMessages = function (
@@ -145,19 +160,23 @@ export const batchDeleteMessages = function (
 
 export const clearInbox = function (userId: string = 'me') {
     cy.listMessages(userId).then(function () {
-        if (this.messagesList.messages) {
-            const ids = this.messagesList.messages.map(({ id }) => id);
+        if (this.messagesListResponse.body.messages) {
+            const ids = this.messagesListResponse.body.messages.map(
+                ({ id }) => id
+            );
             cy.batchDeleteMessages(ids, userId);
         }
     });
 };
 
-export const loginByGoogleUI = () => {
-    cy.log('Logging in to Google');
-    cy.origin('https://accounts.google.com', () => {
-        cy.visit('/ServiceLogin');
-        cy.get('#identifierId').type('testing');
-    });
+export const verifyResponse = (
+    expected: { status: number; bodyEmpty?: boolean },
+    actual: { status: number; body: any }
+) => {
+    expect(actual).to.have.property('status');
+    expect(actual).to.have.property('body');
+    expect(expected.status).to.equal(actual.status);
+    if (expected.bodyEmpty) expect('').to.equal(actual.body);
 };
 
 Cypress.Commands.add('authenticate', authenticate);
@@ -169,4 +188,4 @@ Cypress.Commands.add('trashMessage', trashMessage);
 Cypress.Commands.add('deleteMessage', deleteMessage);
 Cypress.Commands.add('batchDeleteMessages', batchDeleteMessages);
 Cypress.Commands.add('clearInbox', clearInbox);
-Cypress.Commands.add('loginByGoogleUI', loginByGoogleUI);
+Cypress.Commands.add('verifyResponse', verifyResponse);

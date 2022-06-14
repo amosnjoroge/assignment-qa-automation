@@ -1,5 +1,4 @@
 import { lorem } from 'faker';
-import { messageBuilder } from '../fixtures/data-factory';
 
 describe('Main Functionality', () => {
     beforeEach(() => {
@@ -12,13 +11,23 @@ describe('Main Functionality', () => {
         for (let index = 0; index < 3; index++) cy.sendMessage();
 
         cy.listMessages().then(function () {
-            const { resultSizeEstimate, messages } = this.messagesList;
-            expect(resultSizeEstimate).to.equal(3);
-            expect(messages).to.have.length(3);
-            for (const message of messages) {
-                expect(message).to.have.property('id');
-                expect(message).to.have.property('threadId');
-            }
+            const expectedResponse = { status: 200 };
+            const { resultSizeEstimate, messages } =
+                this.messagesListResponse.body;
+
+            cy.verifyResponse(expectedResponse, this.messagesListResponse).then(
+                () => {
+                    expect(this.messagesListResponse.body).to.not.have.property(
+                        'nextPageToken'
+                    );
+                    expect(resultSizeEstimate).to.equal(3);
+                    expect(messages).to.have.length(3);
+                    for (const message of messages) {
+                        expect(message).to.have.property('id');
+                        expect(message).to.have.property('threadId');
+                    }
+                }
+            );
         });
     });
 
@@ -29,20 +38,22 @@ describe('Main Functionality', () => {
         const message = lorem.sentences(4);
 
         cy.sendMessage({ from, to, subject, message }).then(function () {
-            expect(this.sentMessage).to.have.property('id');
-            expect(this.sentMessage).to.have.property('labelIds');
-
-            const { id, labelIds } = this.sentMessage;
+            const { id, labelIds } = this.sentMessageResponse.body;
             const { unread, inbox } = this.testData.labels;
+            const expectedResponse = { status: 200 };
 
-            expect(labelIds).to.include(unread);
-            expect(labelIds).to.include(inbox);
+            cy.verifyResponse(expectedResponse, this.sentMessageResponse).then(
+                () => {
+                    expect(labelIds).to.include(unread);
+                    expect(labelIds).to.include(inbox);
+                }
+            );
 
             cy.getMessage({ id }).then(() => {
                 const {
                     payload: { headers },
                     snippet,
-                } = this.queriedMessage;
+                } = this.queriedMessageResponse.body;
                 expect(headers[1].value).to.equal(from);
                 expect(headers[2].value).to.equal(to);
                 expect(headers[3].value).to.equal(subject);
@@ -54,13 +65,18 @@ describe('Main Functionality', () => {
     it('POST - mark message as read', function () {
         const { unread } = this.testData.labels;
         cy.sendMessage().then(function () {
-            const { id, labelIds } = this.sentMessage;
+            const { id, labelIds } = this.sentMessageResponse.body;
             expect(labelIds).to.include(unread);
 
             cy.modifyMessageLabels({ id, removeLabelIds: [unread] }).then(
                 function () {
-                    const { labelIds } = this.modifiedMessage;
-                    expect(labelIds).to.not.include(unread);
+                    const expectedResponse = { status: 200 };
+                    const { labelIds } = this.modifiedMessageResponse.body;
+
+                    cy.verifyResponse(
+                        expectedResponse,
+                        this.modifiedMessageResponse
+                    ).then(() => expect(labelIds).to.not.include(unread));
                 }
             );
         });
@@ -68,11 +84,16 @@ describe('Main Functionality', () => {
 
     it('POST - move message to the trash', function () {
         cy.sendMessage().then(function () {
-            const { id } = this.sentMessage;
+            const { id } = this.sentMessageResponse.body;
+
             cy.trashMessage(id).then(() => {
-                const { labelIds } = this.trashedMessage;
+                const expectedResponse = { status: 200 };
+                const { labelIds } = this.trashedMessageResponse.body;
                 const { trash } = this.testData.labels;
-                expect(labelIds).to.include(trash);
+                cy.verifyResponse(
+                    expectedResponse,
+                    this.trashedMessageResponse
+                ).then(() => expect(labelIds).to.include(trash));
             });
         });
     });
@@ -85,13 +106,20 @@ describe('Main Functionality', () => {
         };
 
         cy.sendMessage().then(function () {
-            const { id } = this.sentMessage;
-            cy.deleteMessage(id);
-            cy.getMessage({ id, failOnStatusCode: false }).then(() => {
-                const { code, message, status } = this.queriedMessage.error;
-                expect(expectedError.code).to.equal(code);
-                expect(expectedError.message).to.equal(message);
-                expect(expectedError.status).to.equal(status);
+            const { id } = this.sentMessageResponse.body;
+            cy.deleteMessage(id).then(function () {
+                const expectedResponse = { status: 204, bodyEmpty: true };
+                cy.verifyResponse(
+                    expectedResponse,
+                    this.deletedMessageResponse
+                );
+                cy.getMessage({ id, failOnStatusCode: false }).then(() => {
+                    const { code, message, status } =
+                        this.queriedMessageResponse.body.error;
+                    expect(expectedError.code).to.equal(code);
+                    expect(expectedError.message).to.equal(message);
+                    expect(expectedError.status).to.equal(status);
+                });
             });
         });
     });
