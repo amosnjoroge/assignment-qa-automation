@@ -85,6 +85,7 @@ _**Google Project and Application Setup**_
     - Once saved, note the client ID and client secret. You can find these under the "OAuth 2.0 Client IDs" on the [Google API Credentials](https://console.developers.google.com/apis/credentials) page.
 
 _**Refresh Token Teneration**_
+
 The refresh token generated from this process is unique to the authenticated Google user.
 
 1. Open the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground)
@@ -102,6 +103,7 @@ The refresh token generated from this process is unique to the authenticated Goo
 8. You will be taken to `Step 3 (Configure request to API)`. On teh respose body note the `refresh_token` value.
 
 _**Setting Google app credentials in Cypress**_
+
 To have access to test user credentials within our tests we need to configure Cypress to use the Google environment variables as follows:
 
 ```bash
