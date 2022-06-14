@@ -6,7 +6,8 @@ export default defineConfig({
     e2e: {
         baseUrl: 'https://gmail.googleapis.com/gmail/v1',
         experimentalSessionAndOrigin: true,
-        projectId: "wudx8f",
+        projectId: 'wudx8f',
+        retries: { runMode: 2 },
         setupNodeEvents(on, config) {
             on('task', { loginByPuppeteer });
         },
