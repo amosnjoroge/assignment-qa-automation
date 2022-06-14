@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-This repository contains [Gmail's](https://mail.google.com/) main functionality automated API test cases.
+This repository contains [Gmail's](https://mail.google.com/) main functionality manual and automated API test cases.
 
 ### Main Features Test Cases
 
@@ -109,8 +109,8 @@ To have access to test user credentials within our tests we need to configure Cy
 ```bash
 # Google Auth
 export CYPRESS_GOOGLE_REFRESH_TOKEN="<the-generated-refresh-token>"
-export CYPRESS_GOOGLE_CLIENT_ID="<the-generated--client-id>"
-export CYPRESS_GOOGLE_CLIENT_SECRET="<the-generated--client-id>"
+export CYPRESS_GOOGLE_CLIENT_ID="<the-generated-client-id>"
+export CYPRESS_GOOGLE_CLIENT_SECRET="<the-generated-client-id>"
 export CYPRESS_TEST_EMAIL_ID="<your-google-username>" # your username without the domain e.g if you email is spicedemail@gmail.com include only "spicedemail"
 ```
 
